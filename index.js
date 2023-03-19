@@ -101,4 +101,7 @@ function initPayPalButton() {
       }
     }).render('#paypal-button-container');
   }
-  initPayPalButton();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initPayPalButton();
+  });
