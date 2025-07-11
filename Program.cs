@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using gfcf14_art.Services;
 using gfcf14_art;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -12,5 +13,8 @@ builder.Services.AddScoped(sp => new HttpClient
 {
   BaseAddress = new Uri(apiUrl!)
 });
+
+builder.Services.AddScoped<ArtworkService>();
+builder.Services.AddSingleton<LoaderService>();
 
 await builder.Build().RunAsync();

@@ -1,5 +1,69 @@
 ﻿@page "/"
 
-<PageTitle>gfcf14's Art - Home</PageTitle>
+@inject ArtworkService ArtworkService
+@inject LoaderService LoaderService
 
-<p>All artworks will load here</p>
+@if (HasError) {
+  <Error Retry="FetchArtworks" />
+}
+
+@if (IsLoading)
+{
+  <Loader />
+}
+else if (!HasError)
+{
+  <ul class="archive-grid">
+    @foreach (var artwork in Artworks)
+    {
+      <li>
+        <a href="@GetLink(artwork.Date)" class="link-post">
+          <div class="cntr-image">
+            <img src="@artwork.Image" alt="Post: @artwork.Title (@artwork.Date)" />
+            <div class="overlay">
+              <div class="overlay-text">
+                <div class="date">@artwork.Date</div>
+                <div class="title">@artwork.Title</div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </li>
+    }
+  </ul>
+}
+
+@code {
+  private List<Artwork> Artworks = new();
+  private bool IsLoading = false;
+  private bool HasError = false;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await FetchArtworks();
+  }
+
+  private async Task FetchArtworks()
+  {
+    HasError = false;
+    IsLoading = true;
+    LoaderService.Show();
+
+    try
+    {
+      Artworks = await ArtworkService.GetAllAsync();
+    }
+    catch (Exception ex)
+    {
+      Console.Error.WriteLine(ex.Message);
+      HasError = true;
+    }
+    finally
+    {
+      IsLoading = false;
+      LoaderService.Hide();
+    }
+  }
+
+  private string GetLink(string date) => $"/{date}";
+}

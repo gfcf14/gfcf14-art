@@ -1,0 +1,10 @@
+@inject LoaderService LoaderService
+
+@if (LoaderService.IsLoading)
+{
+    <div id="loader">
+        <div class="triple-spinner"></div>
+    </div>
+}
+
+@code {}
