@@ -4,7 +4,7 @@
 @inject LoginService LoginService
 @inject LoaderService LoaderService
 @inject NavigationManager Navigation
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JS
 
 @if (!IsLoggedIn)
 {
@@ -67,7 +67,7 @@ else
   private Artwork Artwork = new()
   {
     Title = "",
-    Date = new(),
+    Date = DateTime.UtcNow,
     Description = "",
     Image = "",
     Links = new List<Link>()
@@ -88,7 +88,7 @@ else
     try
     {
       var result = await LoginService.LoginAsync(Username!, Password!);
-      await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "token", result.Token);
+      await JS.InvokeVoidAsync("sessionStorage.setItem", "token", result.Token);
       IsLoggedIn = true;
       LoginError = null;
     }
@@ -105,7 +105,7 @@ else
 
   private async Task Logout()
   {
-    await JSRuntime.InvokeVoidAsync("sessionStorage.clear");
+    await JS.InvokeVoidAsync("sessionStorage.clear");
     IsLoggedIn = false;
     Navigation.NavigateTo("/");
   }
@@ -123,14 +123,16 @@ else
 
     try
     {
-      var token = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "token");
+      var token = await JS.InvokeAsync<string>("sessionStorage.getItem", "token");
       await ArtworkService.CreateAsync(Artwork, token);
-      Console.WriteLine("Artwork created!");
-      Navigation.NavigateTo("/");
+
+      ClearForm();
+      // TODO: implement the flash message here
     }
     catch (Exception ex)
     {
       Console.WriteLine("Error creating artwork: " + ex.Message);
+      // TODO: implement the flash message here
     }
     finally
     {
@@ -139,9 +141,16 @@ else
     }
   }
 
+  private void ClearForm() {
+    Artwork = new Artwork
+    {
+      Date = DateTime.UtcNow
+    };
+  }
+
   private string? GetTokenFromStorage()
   {
-    var token = JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "token");
+    var token = JS.InvokeAsync<string>("sessionStorage.getItem", "token");
     return token.IsCompletedSuccessfully ? token.Result : null;
   }
 }
