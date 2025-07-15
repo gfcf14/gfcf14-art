@@ -17,7 +17,7 @@ else if (!HasError)
     @foreach (var artwork in Artworks)
     {
       <li>
-        <a href="@GetLink(artwork.Date)" class="link-post">
+        <a href="@GetLink(artwork.Date.ToString("yyyy-MM-dd"))" class="link-post">
           <div class="cntr-image">
             <img src="@artwork.Image" alt="Post: @artwork.Title (@artwork.Date)" />
             <div class="overlay">

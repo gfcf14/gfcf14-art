@@ -1,5 +1,147 @@
 @page "/create"
 
-<PageTitle>Create</PageTitle>
+@inject ArtworkService ArtworkService
+@inject LoginService LoginService
+@inject LoaderService LoaderService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
-<p>Artworks will be created here by admin only</p>
+@if (!IsLoggedIn)
+{
+  <div class="cntr-login">
+    <img class="img-stop" src="images/stop.webp" />
+    <p class="txt-warning">This page is only for the owner of the artwork. If it’s you, please log in:</p>
+
+    <label class="frm-label">
+      Username
+      <input @bind="Username" class="hand-input" />
+    </label>
+
+    <label class="frm-label">
+      Password
+      <input type="password" @bind="Password" class="hand-input" />
+    </label>
+
+    <button @onclick="Login" disabled="@(!IsLoginFormValid())">LOG IN</button>
+
+    @if (!string.IsNullOrEmpty(LoginError))
+    {
+      <p class="txt-error">@LoginError</p>
+    }
+  </div>
+}
+else
+{
+  <EditForm Model="@Artwork" OnValidSubmit="HandleSubmit">
+    <button @onclick="Logout">LOG OUT</button>
+
+    <h2>NEW ARTWORK</h2>
+
+    <input @bind="Artwork.Title" placeholder="Title" />
+    <input @bind="Artwork.Image" placeholder="Image URL" />
+    <textarea @bind="Artwork.Description" placeholder="Description"></textarea>
+    <input @bind="Artwork.Date" type="date" />
+
+    <h4>Links</h4>
+    @foreach (var link in Artwork.Links)
+    {
+      <div class="link-group">
+        <input @bind="link.Type" placeholder="Type" />
+        <input @bind="link.Url" placeholder="URL" />
+        <button type="button" @onclick="@(() => RemoveLink(link))">Remove</button>
+      </div>
+    }
+
+    <button type="button" @onclick="AddLink">Add Link</button>
+    <button type="submit" disabled="@IsLoading">CREATE ARTWORK</button>
+  </EditForm>
+}
+
+@code {
+  private bool IsLoggedIn = false;
+  private bool IsLoading = false;
+  private string? Username;
+  private string? Password;
+  private string? LoginError;
+
+  private Artwork Artwork = new()
+  {
+    Title = "",
+    Date = new(),
+    Description = "",
+    Image = "",
+    Links = new List<Link>()
+  };
+
+  protected override void OnInitialized()
+  {
+    var token = GetTokenFromStorage();
+    if (!string.IsNullOrEmpty(token) && LoginService.IsTokenValid(token))
+    {
+      IsLoggedIn = true;
+    }
+  }
+
+  private async Task Login()
+  {
+    LoaderService.Show();
+    try
+    {
+      var result = await LoginService.LoginAsync(Username!, Password!);
+      await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "token", result.Token);
+      IsLoggedIn = true;
+      LoginError = null;
+    }
+    catch (Exception ex)
+    {
+      LoginError = "Invalid credentials";
+      Console.WriteLine(ex.Message);
+    }
+    finally
+    {
+      LoaderService.Hide();
+    }
+  }
+
+  private async Task Logout()
+  {
+    await JSRuntime.InvokeVoidAsync("sessionStorage.clear");
+    IsLoggedIn = false;
+    Navigation.NavigateTo("/");
+  }
+
+  private bool IsLoginFormValid() => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
+
+  private void AddLink() => Artwork.Links.Add(new Link());
+
+  private void RemoveLink(Link link) => Artwork.Links.Remove(link);
+
+  private async Task HandleSubmit()
+  {
+    IsLoading = true;
+    LoaderService.Show();
+
+    try
+    {
+      var token = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "token");
+      await ArtworkService.CreateAsync(Artwork, token);
+      Console.WriteLine("Artwork created!");
+      Navigation.NavigateTo("/");
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine("Error creating artwork: " + ex.Message);
+    }
+    finally
+    {
+      IsLoading = false;
+      LoaderService.Hide();
+    }
+  }
+
+  private string? GetTokenFromStorage()
+  {
+    var token = JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "token");
+    return token.IsCompletedSuccessfully ? token.Result : null;
+  }
+}

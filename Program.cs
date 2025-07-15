@@ -20,6 +20,7 @@ builder.Services.AddScoped(sp => new HttpClient
 });
 
 builder.Services.AddScoped<ArtworkService>();
+builder.Services.AddScoped<LoginService>();
 builder.Services.AddSingleton<LoaderService>();
 
 await builder.Build().RunAsync();
