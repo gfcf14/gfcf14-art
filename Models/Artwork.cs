@@ -2,7 +2,7 @@ namespace gfcf14_art.Models;
 
 public class Artwork
 {
-  public DateTime Date { get; set; } = new();
+  public DateOnly Date { get; set; } = new();
   public string Title { get; set; } = string.Empty;
   public string Description { get; set; } = string.Empty;
   public string Image { get; set; } = string.Empty;
