@@ -1,5 +1,94 @@
 @page "/{date}"
 
+@inject ArtworkService ArtworkService
+@inject LoaderService LoaderService
+@inject NavigationManager Navigation
+
 <PageTitle>Artwork Detail</PageTitle>
 
-<p>A single artwork will show here by date</p>
+@if (ErrorMessage is not null)
+{
+  <ErrorComponent Retry="FetchArtworkAsync" />
+}
+else if (IsLoading)
+{
+  <Loader />
+}
+else if (Artwork is not null)
+{
+  <div class="cntr-detail">
+    <h3 class="txt-title">@Artwork.Title (@Artwork.Date)</h3>
+    <img src="@Artwork.Image" alt="Image for @Artwork.Title" class="img-post" />
+
+    @if (Artwork.Links?.Count > 0)
+    {
+      <div class="cntr-links">
+        <h4 class="txt-join">JOIN THE CONVERSATION!</h4>
+        <ul class="link-list">
+          @foreach (var link in Artwork.Links)
+          {
+            <li>
+              <a href="@link.Url" target="_blank" rel="noopener noreferrer">
+                <img src="@GetPlatformIcon(link.Type)" alt="@link.Type" />
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+}
+
+@code {
+  [Parameter]
+  public string? Date { get; set; }
+
+  private Artwork? Artwork;
+  private bool IsLoading = true;
+  private string? ErrorMessage;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await FetchArtworkAsync();
+  }
+
+  private async Task FetchArtworkAsync()
+  {
+    ErrorMessage = null;
+    IsLoading = true;
+    LoaderService.Show();
+
+    try
+    {
+      if (string.IsNullOrWhiteSpace(Date))
+      {
+        ErrorMessage = "Invalid artwork date.";
+        return;
+      }
+
+      var data = await ArtworkService.GetByDateAsync(Date.ToString());
+      var expectedDate = data.Date.ToString("yyyy-MM-dd");
+
+      if (expectedDate != Date)
+      {
+        Navigation.NavigateTo($"/{expectedDate}", forceLoad: true);
+        return;
+      }
+
+      Artwork = data;
+    }
+    catch (Exception ex)
+    {
+      Console.Error.WriteLine(ex);
+      ErrorMessage = "Failed to load artwork.";
+    }
+    finally
+    {
+      IsLoading = false;
+      LoaderService.Hide();
+    }
+  }
+
+  private string GetPlatformIcon(string type) => $"images/icons/{type}.webp";
+}
+

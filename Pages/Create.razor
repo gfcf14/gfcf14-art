@@ -59,7 +59,8 @@ else
   </EditForm>
 }
 
-@code {
+@code
+{
   private bool IsLoggedIn = false;
   private bool IsLoading = false;
   private string? Username;
@@ -75,7 +76,8 @@ else
     Links = new List<Link>()
   };
 
-  private Login LoginModel = new() {
+  private Login LoginModel = new()
+  {
     Username = "",
     Password = ""
   };
@@ -148,7 +150,8 @@ else
     }
   }
 
-  private void ClearForm() {
+  private void ClearForm()
+  {
     Artwork = new Artwork
     {
       Date = DateOnly.FromDateTime(DateTime.Now)

@@ -17,6 +17,14 @@ public class ArtworkService
     baseUrl = _config["API_URL"] ?? throw new InvalidOperationException("API_URL not set");
   }
 
+  public async Task<Artwork> GetByDateAsync(string date)
+  {
+    var response = await _http.GetAsync($"{baseUrl}/gfcf14-art/artworks/{date}");
+    response.EnsureSuccessStatusCode();
+
+    return await response.Content.ReadFromJsonAsync<Artwork>() ?? throw new Exception($"Artwork for date {date} not found");
+  }
+
   public async Task<List<Artwork>> GetAllAsync()
   {
     return await _http.GetFromJsonAsync<List<Artwork>>($"{baseUrl}/gfcf14-art/artworks") ?? new List<Artwork>();
