@@ -12,22 +12,24 @@
     <img class="img-stop" src="images/stop.webp" />
     <p class="txt-warning">This page is only for the owner of the artwork. If it’s you, please log in:</p>
 
-    <label class="frm-label">
-      Username
-      <input @bind="Username" class="hand-input" />
-    </label>
+    <EditForm Model="@LoginModel" OnValidSubmit="Login">
+      <label class="frm-label">
+        Username
+        <input @bind="Username" class="hand-input" />
+      </label>
 
-    <label class="frm-label">
-      Password
-      <input type="password" @bind="Password" class="hand-input" />
-    </label>
+      <label class="frm-label">
+        Password
+        <input type="password" @bind="Password" class="hand-input" />
+      </label>
 
-    <button @onclick="Login" disabled="@(!IsLoginFormValid())">LOG IN</button>
+      <button type="submit" disabled="@(!IsLoginFormValid())">LOG IN</button>
 
-    @if (!string.IsNullOrEmpty(LoginError))
-    {
-      <p class="txt-error">@LoginError</p>
-    }
+      @if (!string.IsNullOrEmpty(LoginError))
+      {
+        <p class="txt-error">@LoginError</p>
+      }
+    </EditForm>
   </div>
 }
 else
@@ -71,6 +73,11 @@ else
     Description = "",
     Image = "",
     Links = new List<Link>()
+  };
+
+  private Login LoginModel = new() {
+    Username = "",
+    Password = ""
   };
 
   protected override void OnInitialized()
