@@ -4,7 +4,7 @@
 
 <div class="cntr-main">
   <div class="cntr-about">
-    <img class="img-avatar" src="assets/images/me.webp" alt="About Me Image" />
+    <img class="img-avatar" src="/assets/images/me.webp" alt="About Me Image" />
     <p class="txt-about">
       Hi! I made this page to house all of my artworks related to my fan art, commissions, or original characters.
       If you however wish to follow my artworks in more popular networks, please feel free
@@ -31,7 +31,7 @@
     new SocialLink { Type = "instagram", Url = "https://www.instagram.com/gfcf14/" },
   };
 
-  private string GetPlatformIcon(string type) => $"assets/icons/{type}.webp";
+  private string GetPlatformIcon(string type) => $"/assets/icons/{type}.webp";
 
   private string Capitalize(string input) =>
     string.IsNullOrEmpty(input) ? input : char.ToUpper(input[0]) + input[1..];
