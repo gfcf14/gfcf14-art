@@ -174,9 +174,9 @@
     Password = ""
   };
 
-  protected override void OnInitialized()
+  protected override async Task OnInitializedAsync()
   {
-    var token = GetTokenFromStorage();
+    var token = await GetTokenFromStorage();
     if (!string.IsNullOrEmpty(token) && LoginService.IsTokenValid(token))
     {
       IsLoggedIn = true;
@@ -286,9 +286,8 @@
     };
   }
 
-  private string? GetTokenFromStorage()
+  private async Task<string> GetTokenFromStorage()
   {
-    var token = JS.InvokeAsync<string>("sessionStorage.getItem", "token");
-    return token.IsCompletedSuccessfully ? token.Result : null;
+    return await JS.InvokeAsync<string>("sessionStorage.getItem", "token");
   }
 }
