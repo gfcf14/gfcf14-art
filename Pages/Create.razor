@@ -6,66 +6,158 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-@if (!IsLoggedIn)
+@if (IsPreviewOpen)
 {
-  <div class="cntr-login">
-    <img class="img-stop" src="/assets/images/stop.webp" />
-    <p class="txt-warning">This page is only for the owner of the artwork. If it’s you, please log in:</p>
-
-    <EditForm Model="@LoginModel" OnValidSubmit="Login">
-      <label class="frm-label">
-        Username
-        <input @bind="Username" class="hand-input" />
-      </label>
-
-      <label class="frm-label">
-        Password
-        <input type="password" @bind="Password" class="hand-input" />
-      </label>
-
-      <button type="submit" disabled="@(!IsLoginFormValid())">LOG IN</button>
-
-      @if (!string.IsNullOrEmpty(LoginError))
-      {
-        <p class="txt-error">@LoginError</p>
-      }
-    </EditForm>
+  <div class="cntr-preview" @onclick="ClosePreview">
+    <span role="button" class="btn-close-preview" @onclick="ClosePreview">
+      <img class="img-close-preview" src="/assets/icons/plus-sign.webp" alt="Close Preview Button" />
+    </span>
+    <img class="img-preview" src="@(Artwork.Image)" alt="Preview Image" />
   </div>
 }
-else
-{
-  <EditForm Model="@Artwork" OnValidSubmit="HandleSubmit">
-    <button @onclick="Logout">LOG OUT</button>
 
-    <h2>NEW ARTWORK</h2>
+<div class="cntr-main">
+  @if (!IsLoggedIn)
+  {
+    <div class="cntr-login">
+      <img class="img-stop" src="/assets/images/stop.webp" />
+      <p class="txt-warning">This page is only for the owner of the artwork. If it’s you, please log in:</p>
 
-    <input @bind="Artwork.Title" placeholder="Title" />
-    <input @bind="Artwork.Image" placeholder="Image URL" />
-    <textarea @bind="Artwork.Description" placeholder="Description"></textarea>
-    <input @bind="Artwork.Date" type="date" />
+      <EditForm Model="@LoginModel" OnValidSubmit="Login" class="cntr-login">
+        <label class="frm-label">
+          Username
+          <input @bind="Username" class="hand-input" />
+        </label>
 
-    <h4>Links</h4>
-    @foreach (var link in Artwork.Links)
+        <label class="frm-label">
+          Password
+          <input type="password" @bind="Password" class="hand-input" />
+        </label>
+
+        <button type="submit" disabled="@(!IsLoginFormValid())">LOG IN</button>
+
+        @if (!string.IsNullOrEmpty(LoginError))
+        {
+          <p class="txt-error">@LoginError</p>
+        }
+      </EditForm>
+    </div>
+  }
+  else
+  {
+    <EditForm Model="@Artwork" OnValidSubmit="SubmitArtwork" class="frm-create" id="create-form">
+      <span role="button" @onclick="Logout" class="btn-logout">LOG OUT</span>
+      <h2>NEW ARTWORK</h2>
+
+      <div class="cntr-nonmobile-top-fields">
+        @if (deviceType == "desktop")
+        {
+          <div class="cntr-labels">
+            <label for="title">Title</label>
+            <label for="image">Image</label>
+            <label for="description">Description</label>
+          </div>
+        }
+
+        <div class="cntr-title-img-desc">
+          <input @bind="Artwork.Title" id="title" name="title" placeholder="Title" required />
+
+          <div class="cntr-image">
+            <input @bind="Artwork.Image" id="image" name="image" placeholder="Image" required />
+            @if (deviceType == "mobile")
+            {
+              <span role="button" class="btn-mobile-preview">
+                <img class="img-eye" src="assets/icons/eye.webp" alt="Mobile Image Preview Button" @onclick="OpenPreview" />
+              </span>
+            }
+          </div>
+
+          <textarea @bind="Artwork.Description" id="description" name="description" placeholder="Description"></textarea>
+        </div>
+
+        @if (deviceType != "mobile")
+        {
+          <div class="cntr-nonmobile-preview">
+            @if (Artwork.Image != "")
+            {
+              <img class="img-nonmobile-preview" src="@(Artwork.Image)" alt="Preview Image" />
+            }
+          </div>
+        }
+      </div>
+
+      <div class="cntr-date">
+        @if (deviceType != "desktop")
+        {
+          <span role="button" class="btn-calendar">
+            <img class="img-calendar" src="/assets/icons/calendar.webp" alt="Date Button" />
+          </span>
+        }
+        else
+        {
+          <label for="date">Date</label>
+        }
+        <input @bind="Artwork.Date" id="date" name="date" placeholder="YYYY-MM-DD" type="date" required />
+      </div>
+
+      <div class="cntr-links">
+        <div class="cntr-speech-control @(Artwork.Links.Count > 0 ? "with-links" : "")">
+          @if (deviceType != "desktop")
+          {
+            <img class="img-speech-bubble" src="/assets/icons/speech-bubble.webp" alt="Speech Bubble Image" />
+          }
+          else
+          {
+            <span>Links</span>
+          }
+          <span role="button" class="btn-add-link" @onclick="AddLink">
+            <img class="img-add-link" src="/assets/icons/plus-sign.webp" alt="Add New Link Button" />
+          </span>
+        </div>
+
+        @if (Artwork.Links.Count > 0)
+        {
+          <div class="cntr-link-list">
+            @{int i = 0;}
+            @foreach (var link in Artwork.Links)
+            {
+              <div class="link-group">
+                <div class="cntr-link-data">
+                  <input @bind="link.Type" id="link-type-@(i)" name="link-type-@(i)" placeholder="Type" required />
+                  <input @bind="link.Url" id="link-url-@(i)" name="link-url-@(i)" placeholder="Url" required />
+                </div>
+                <span role="button" class="btn-trash-bin" @onclick="@(() => RemoveLink(link))">
+                  <img class="img-trash-bin" src="/assets/icons/trash-bin.webp" alt="Link Delete Button" />
+                </span>
+              </div>
+              i++;
+            }
+          </div>
+        }
+      </div>
+      @* <button type="submit" disabled="@IsLoading">CREATE ARTWORK</button> *@
+    </EditForm>
+
+    @if (IsLoggedIn)
     {
-      <div class="link-group">
-        <input @bind="link.Type" placeholder="Type" />
-        <input @bind="link.Url" placeholder="URL" />
-        <button type="button" @onclick="@(() => RemoveLink(link))">Remove</button>
+      <div class="cntr-create-post-button">
+        <button disabled="@IsLoading || @(!IsCreateFormValid())" class="btn-create-post" form="create-form" type="submit">
+          CREATE ARTWORK
+        </button>
       </div>
     }
-
-    <button type="button" @onclick="AddLink">Add Link</button>
-    <button type="submit" disabled="@IsLoading">CREATE ARTWORK</button>
-  </EditForm>
-}
+  }
+</div>
 
 @code
 {
   private bool IsLoggedIn = false;
   private bool IsLoading = false;
+  private bool IsPreviewOpen = false;
   private string? Username;
   private string? Password;
   private string? LoginError;
+  private string deviceType = "desktop";
 
   private Artwork Artwork = new()
   {
@@ -88,6 +180,27 @@ else
     if (!string.IsNullOrEmpty(token) && LoginService.IsTokenValid(token))
     {
       IsLoggedIn = true;
+    }
+  }
+
+  [JSInvokable]
+  public async Task OnResize()
+  {
+    await UpdateDeviceType();
+    StateHasChanged();
+  }
+
+  private async Task UpdateDeviceType()
+  {
+    deviceType = await JS.InvokeAsync<string>("viewportHelper.getDeviceType");
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      await UpdateDeviceType();
+      await JS.InvokeVoidAsync("viewportHelper.registerResizeCallback", DotNetObjectReference.Create(this));
     }
   }
 
@@ -121,11 +234,26 @@ else
 
   private bool IsLoginFormValid() => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
 
+  private bool IsCreateFormValid() {
+    bool HasRequiredFields = Artwork.Title != "" && DateOnly.TryParse(Artwork.Date.ToString(), out var date) && Artwork.Image != "";
+    bool AllLinksValid = Artwork.Links.TrueForAll(link => link.Type != "" && link.Url != "");
+
+    return HasRequiredFields && AllLinksValid;
+  }
+
   private void AddLink() => Artwork.Links.Add(new Link());
 
   private void RemoveLink(Link link) => Artwork.Links.Remove(link);
 
-  private async Task HandleSubmit()
+  private void OpenPreview() {
+    IsPreviewOpen = true;
+  }
+
+  private void ClosePreview() {
+    IsPreviewOpen = false;
+  }
+
+  private async Task SubmitArtwork()
   {
     IsLoading = true;
     LoaderService.Show();
