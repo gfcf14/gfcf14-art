@@ -20,6 +20,9 @@
 }
 
 .cntr-image {
+  aspect-ratio: 3 / 4;
+  background-position: center;
+  background-size: cover;
   position: relative;
   width: 100%;
 }
@@ -52,6 +55,9 @@
   font-weight: bold;
 }
 
+.link-post {
+  width: 100%;
+}
 .link-post:hover .overlay {
   opacity: 1;
 }

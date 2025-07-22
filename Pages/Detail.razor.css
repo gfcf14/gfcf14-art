@@ -12,7 +12,6 @@
 }
 
 .img-post {
-  aspect-ratio: 3 / 4;
   height: auto;
   margin: 0 auto;
   max-height: calc(100vh - 18.5rem);
