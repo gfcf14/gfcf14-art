@@ -26,12 +26,12 @@
       <EditForm Model="@LoginModel" OnValidSubmit="Login" class="cntr-login">
         <label class="frm-label">
           Username
-          <input @bind="Username" class="hand-input" />
+          <input @bind="Username" @bind:event="oninput" name="username" class="hand-input" />
         </label>
 
         <label class="frm-label">
           Password
-          <input type="password" @bind="Password" class="hand-input" />
+          <input @bind="Password" @bind:event="oninput" type="password" name="password" class="hand-input" />
         </label>
 
         <button type="submit" disabled="@(!IsLoginFormValid())">LOG IN</button>
@@ -60,10 +60,10 @@
         }
 
         <div class="cntr-title-img-desc">
-          <input @bind="Artwork.Title" id="title" name="title" placeholder="Title" required />
+          <input @bind="Artwork.Title" @bind:event="oninput" id="title" name="title" placeholder="Title" required />
 
           <div class="cntr-image">
-            <input @bind="Artwork.Image" id="image" name="image" placeholder="Image" required />
+            <input @bind="Artwork.Image" @bind:event="oninput" id="image" name="image" placeholder="Image" required />
             @if (deviceType == "mobile")
             {
               <span role="button" class="btn-mobile-preview">
@@ -72,7 +72,7 @@
             }
           </div>
 
-          <textarea @bind="Artwork.Description" id="description" name="description" placeholder="Description"></textarea>
+          <textarea @bind="Artwork.Description" @bind:event="oninput" id="description" name="description" placeholder="Description"></textarea>
         </div>
 
         @if (deviceType != "mobile")
@@ -97,7 +97,7 @@
         {
           <label for="date">Date</label>
         }
-        <input @bind="Artwork.Date" id="date" name="date" placeholder="YYYY-MM-DD" type="date" required />
+        <input @bind="Artwork.Date" @bind:event="oninput" id="date" name="date" placeholder="YYYY-MM-DD" type="date" required />
       </div>
 
       <div class="cntr-links">
@@ -123,8 +123,8 @@
             {
               <div class="link-group">
                 <div class="cntr-link-data">
-                  <input @bind="link.Type" id="link-type-@(i)" name="link-type-@(i)" placeholder="Type" required />
-                  <input @bind="link.Url" id="link-url-@(i)" name="link-url-@(i)" placeholder="Url" required />
+                  <input @bind="link.Type" @bind:event="oninput" id="link-type-@(i)" name="link-type-@(i)" placeholder="Type" required />
+                  <input @bind="link.Url" @bind:event="oninput" id="link-url-@(i)" name="link-url-@(i)" placeholder="Url" required />
                 </div>
                 <span role="button" class="btn-trash-bin" @onclick="@(() => RemoveLink(link))">
                   <img class="img-trash-bin" src="/assets/icons/trash-bin.webp" alt="Link Delete Button" />
@@ -141,7 +141,7 @@
     @if (IsLoggedIn)
     {
       <div class="cntr-create-post-button">
-        <button disabled="@IsLoading || @(!IsCreateFormValid())" class="btn-create-post" form="create-form" type="submit">
+        <button disabled="@(!IsFormValid)" class="btn-create-post" form="create-form" type="submit">
           CREATE ARTWORK
         </button>
       </div>
@@ -158,6 +158,14 @@
   private string? Password;
   private string? LoginError;
   private string deviceType = "desktop";
+
+  private bool IsFormValid => !IsLoading &&
+    !string.IsNullOrWhiteSpace(Artwork.Title) &&
+    DateOnly.TryParse(Artwork.Date.ToString(), out _) &&
+    !string.IsNullOrWhiteSpace(Artwork.Image) &&
+    Artwork.Links.TrueForAll(link =>
+        !string.IsNullOrWhiteSpace(link.Type) &&
+        !string.IsNullOrWhiteSpace(link.Url));
 
   private Artwork Artwork = new()
   {
@@ -176,6 +184,8 @@
 
   protected override async Task OnInitializedAsync()
   {
+    await UpdateDeviceType();
+
     var token = await GetTokenFromStorage();
     if (!string.IsNullOrEmpty(token) && LoginService.IsTokenValid(token))
     {
@@ -233,13 +243,6 @@
   }
 
   private bool IsLoginFormValid() => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password);
-
-  private bool IsCreateFormValid() {
-    bool HasRequiredFields = Artwork.Title != "" && DateOnly.TryParse(Artwork.Date.ToString(), out var date) && Artwork.Image != "";
-    bool AllLinksValid = Artwork.Links.TrueForAll(link => link.Type != "" && link.Url != "");
-
-    return HasRequiredFields && AllLinksValid;
-  }
 
   private void AddLink() => Artwork.Links.Add(new Link());
 

@@ -73,6 +73,10 @@ input[placeholder="Image"], input[placeholder="YYYY-MM-DD"] {
   gap: 0.5rem;
 }
 
+.cntr-labels {
+  display: none;
+}
+
 .cntr-link-data {
   display: flex;
   flex-direction: column;
@@ -106,6 +110,10 @@ input[placeholder="Image"], input[placeholder="YYYY-MM-DD"] {
 .cntr-main {
   display: flex;
   padding: 0.5rem;
+}
+
+.cntr-nonmobile-preview {
+  display: none;
 }
 
 .cntr-nonmobile-top-fields {
