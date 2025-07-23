@@ -1,6 +1,7 @@
 @page "/create"
 
 @inject ArtworkService ArtworkService
+@inject FlashMessageService FlashMessageService
 @inject LoginService LoginService
 @inject LoaderService LoaderService
 @inject NavigationManager Navigation
@@ -267,12 +268,12 @@
       await ArtworkService.CreateAsync(Artwork, token);
 
       ClearForm();
-      // TODO: implement the flash message here
+      FlashMessageService.Show("Artwork created successfully!", "success");
     }
     catch (Exception ex)
     {
       Console.WriteLine("Error creating artwork: " + ex.Message);
-      // TODO: implement the flash message here
+      FlashMessageService.Show("Failed to create artwork", "error");
     }
     finally
     {

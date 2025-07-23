@@ -1,0 +1,38 @@
+@inject FlashMessageService FlashMessageService
+
+@if (message != null)
+{
+  <div class="wrapper @GetTypeClass() @(message.Message != "" ? "active" : "")" style="display: flex;">
+    <div class="icon-container @GetTypeClass()">
+      <img class="flash-icon" src="assets/icons/flash-@(message.Type).webp" alt="Flash icon" />
+    </div>
+    <div class="text-container">
+      <h3 class="flash-header">@Capitalize(message.Type)</h3>
+      <p class="flash-message">@message.Message</p>
+    </div>
+  </div>
+}
+
+@code {
+  private gfcf14_art.Models.FlashMessage? message;
+
+  protected override void OnInitialized()
+  {
+    message = FlashMessageService.CurrentMessage;
+    FlashMessageService.OnMessageChanged += () =>
+    {
+      message = FlashMessageService.CurrentMessage;
+      InvokeAsync(StateHasChanged);
+    };
+  }
+
+  private string Capitalize(string text)
+  {
+    return string.IsNullOrWhiteSpace(text)
+      ? ""
+      : char.ToUpper(text[0]) + text[1..];
+  }
+
+  private string GetTypeClass() =>
+    message?.Type == "success" ? "success" : "error";
+}

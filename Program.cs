@@ -22,5 +22,6 @@ builder.Services.AddScoped(sp => new HttpClient
 builder.Services.AddScoped<ArtworkService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddSingleton<LoaderService>();
+builder.Services.AddSingleton<FlashMessageService>();
 
 await builder.Build().RunAsync();
