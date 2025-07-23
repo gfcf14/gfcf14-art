@@ -7,10 +7,6 @@
   <Error Retry="FetchArtworks" />
 }
 
-@if (IsLoading)
-{
-  <Loader />
-}
 else if (!HasError)
 {
   <ul class="archive-grid">
@@ -34,7 +30,6 @@ else if (!HasError)
 
 @code {
   private List<Artwork> Artworks = new();
-  private bool IsLoading = false;
   private bool HasError = false;
 
   protected override async Task OnInitializedAsync()
@@ -45,7 +40,6 @@ else if (!HasError)
   private async Task FetchArtworks()
   {
     HasError = false;
-    IsLoading = true;
     LoaderService.Show();
 
     try
@@ -59,7 +53,6 @@ else if (!HasError)
     }
     finally
     {
-      IsLoading = false;
       LoaderService.Hide();
     }
   }

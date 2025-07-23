@@ -136,7 +136,6 @@
           </div>
         }
       </div>
-      @* <button type="submit" disabled="@IsLoading">CREATE ARTWORK</button> *@
     </EditForm>
 
     @if (IsLoggedIn)
@@ -153,14 +152,13 @@
 @code
 {
   private bool IsLoggedIn = false;
-  private bool IsLoading = false;
   private bool IsPreviewOpen = false;
   private string? Username;
   private string? Password;
   private string? LoginError;
   private string deviceType = "desktop";
 
-  private bool IsFormValid => !IsLoading &&
+  private bool IsFormValid => !LoaderService.IsLoading &&
     !string.IsNullOrWhiteSpace(Artwork.Title) &&
     DateOnly.TryParse(Artwork.Date.ToString(), out _) &&
     !string.IsNullOrWhiteSpace(Artwork.Image) &&
@@ -259,7 +257,6 @@
 
   private async Task SubmitArtwork()
   {
-    IsLoading = true;
     LoaderService.Show();
 
     try
@@ -277,7 +274,6 @@
     }
     finally
     {
-      IsLoading = false;
       LoaderService.Hide();
     }
   }

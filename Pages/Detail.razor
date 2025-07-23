@@ -10,10 +10,6 @@
 {
   <Error Retry="FetchArtworkAsync" />
 }
-else if (IsLoading)
-{
-  <Loader />
-}
 else if (Artwork is not null)
 {
   <div class="cntr-detail">
@@ -44,7 +40,6 @@ else if (Artwork is not null)
   public string? Date { get; set; }
 
   private Artwork? Artwork;
-  private bool IsLoading = true;
   private string? ErrorMessage;
 
   protected override async Task OnInitializedAsync()
@@ -55,7 +50,6 @@ else if (Artwork is not null)
   private async Task FetchArtworkAsync()
   {
     ErrorMessage = null;
-    IsLoading = true;
     LoaderService.Show();
 
     try
@@ -84,7 +78,6 @@ else if (Artwork is not null)
     }
     finally
     {
-      IsLoading = false;
       LoaderService.Hide();
     }
   }

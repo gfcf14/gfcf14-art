@@ -1,6 +1,29 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject LoaderService LoaderService
 
+@if (LoaderService.IsLoading)
+{
+  <Loader />
+}
 <FlashMessage />
 <Navbar />
 @Body
 <Footer />
+
+@code {
+  protected override void OnInitialized()
+  {
+    LoaderService.OnChange += HandleLoaderChange;
+  }
+
+  private void HandleLoaderChange()
+  {
+    InvokeAsync(StateHasChanged);
+  }
+
+  public void Dispose()
+  {
+    LoaderService.OnChange -= HandleLoaderChange;
+  }
+}
