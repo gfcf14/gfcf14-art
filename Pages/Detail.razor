@@ -44,6 +44,12 @@ else if (Artwork is not null)
 
   protected override async Task OnInitializedAsync()
   {
+    if (!DateOnly.TryParse(Date, out var parsedDate))
+    {
+      Navigation.NavigateTo("/404");
+      return;
+    }
+
     await FetchArtworkAsync();
   }
 
