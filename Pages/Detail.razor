@@ -50,6 +50,13 @@ else if (Artwork is not null)
       return;
     }
 
+    var today = DateOnly.FromDateTime(DateTime.Today);
+    if (parsedDate > today)
+    {
+        Navigation.NavigateTo("/404");
+        return;
+    }
+
     await FetchArtworkAsync();
   }
 
