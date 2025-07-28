@@ -7,6 +7,8 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
+<PageTitle>Gfcf14's Art: @(!IsLoggedIn ? "STOP!" : "Create Artwork")</PageTitle>
+
 @if (IsPreviewOpen)
 {
   <div class="cntr-preview" @onclick="ClosePreview">

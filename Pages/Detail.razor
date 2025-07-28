@@ -4,7 +4,7 @@
 @inject LoaderService LoaderService
 @inject NavigationManager Navigation
 
-<PageTitle>Artwork Detail</PageTitle>
+<PageTitle>Gfcf14's Art: @(ArtworkTitle)</PageTitle>
 
 @if (ErrorMessage is not null)
 {
@@ -41,6 +41,7 @@ else if (Artwork is not null)
 
   private Artwork? Artwork;
   private string? ErrorMessage;
+  private string ArtworkTitle = "Loading Artwork";
 
   protected override async Task OnInitializedAsync()
   {
@@ -83,6 +84,7 @@ else if (Artwork is not null)
       }
 
       Artwork = data;
+      ArtworkTitle = $"{Artwork.Title} ({Artwork.Date})";
     }
     catch (Exception ex)
     {
