@@ -27,7 +27,7 @@ jobs:
         run: |
           $file = "wwwroot/appsettings.json"
           $content = Get-Content $file -Raw
-          $updated = $content -replace "http://localhost:5000/api", "https://gfcf14-bff.vercel.app/api"
+          $updated = $content -replace "http://localhost:5000/api", "https://gfcf14-sba.vercel.app/api"
           $updated | Set-Content $file
 
       - name: Build with dotnet
